@@ -4,12 +4,14 @@ import{MenuItem,FormControl,Select, Card, CardContent} from "@material-ui/core";
 import Infobox from "./Infobox";
 import Map from "./Map";
 import Table from "./Table";
-
+import { sortData } from './util';
+import LineGraph from "./LineGraph";
 function App() {
     const [countries, setcountries] = useState([]);
     const [country, setcountry] = useState("Worldwide"); 
     const [countryInfo, setCountryInfo] = useState({});
     const [tableData,setTableData] = useState([]);
+    const [casesType, setCasesType] = useState("cases");
 
     useEffect(() => {
       fetch("https://disease.sh/v3/covid-19/all")
@@ -29,8 +31,10 @@ function App() {
               name:country.country, 
               value:country.countryInfo.iso2, 
             }));
+
+          const sortedData = sortData(data);
+          setTableData(sortedData);
           setcountries(countries);
-          setTableData(data);
         })
       };
 
@@ -74,9 +78,9 @@ function App() {
     </div>
 
       <div className="app_stats"> 
-            <Infobox title="Corona_Cases" cases={countryInfo.todayCases} total={countryInfo.cases}> </Infobox>
-            <Infobox title="Corona_Recoverd" cases={countryInfo.todayRecovered} total={countryInfo.recovered}> </Infobox>
-            <Infobox title="Corona_Death" cases={countryInfo.todayDeaths} total={countryInfo.deaths}> </Infobox>
+            <Infobox title="Corona_Cases" onClick={(e) => setCasesType("cases")} active={casesType === "cases"} cases={countryInfo.todayCases} total={countryInfo.cases}> </Infobox>
+            <Infobox title="Corona_Recoverd" onClick={(e) => setCasesType("recovered")} active={casesType === "recovered"} cases={countryInfo.todayRecovered} total={countryInfo.recovered}> </Infobox>
+            <Infobox title="Corona_Death" onClick={(e) => setCasesType("deaths")} active={casesType === "deaths"} cases={countryInfo.todayDeaths} total={countryInfo.deaths}> </Infobox>
       </div>
       <Map></Map>
       </div>
@@ -85,6 +89,8 @@ function App() {
       <CardContent>
         <h3>Live cases by country </h3>
         <Table countries={tableData} />
+        <h3>Worldwide new {casesType}</h3>
+        <LineGraph casesType={casesType} />
       </CardContent>
     </Card>
 
